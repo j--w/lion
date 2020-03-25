@@ -6,7 +6,7 @@ module.exports = {
         '**/test-suites/**/*.js',
         '**/test/**/*.js',
         '**/test-node/**/*.js',
-        '**/stories/**/*.js',
+        '**/docs/**/*.js',
         '**/*.config.js',
       ],
       rules: {
