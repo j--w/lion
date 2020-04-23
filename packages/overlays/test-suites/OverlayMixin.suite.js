@@ -190,10 +190,9 @@ export function runOverlayMixinSuite({ /* tagString, */ tag, suffix = '' }) {
         expect(lastContentNodeInContainer.firstElementChild.slot).to.equal('content');
       } else {
         const actualNestedOverlay = mainEl._overlayContentNode.firstElementChild;
-        const outletNode = Array.from(actualNestedOverlay.children).find(
-          child => child.slot === '_overlay-shadow-outlet',
+        const contentNode = Array.from(actualNestedOverlay.children).find(
+          child => child.slot === 'content',
         );
-        const contentNode = Array.from(outletNode.children).find(child => child.slot === 'content');
 
         expect(contentNode).to.not.be.undefined;
         expect(contentNode.innerText).to.equal('content of the nested overlay');

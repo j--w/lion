@@ -61,7 +61,7 @@ export class LionTooltip extends OverlayMixin(LitElement) {
     return html`
       <slot name="invoker"></slot>
       <div id="overlay-content-node-wrapper">
-        <slot name="content"> </slot>
+        <slot name="content"></slot>
         <div class="arrow" data-popper-arrow>
           <slot name="arrow"></slot>
         </div>

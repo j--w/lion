@@ -3,7 +3,7 @@ import { OverlayController } from './OverlayController.js';
 
 /**
  * @type {Function()}
- * @polymerMixin
+ * @polymerMixinOverlayMixin
  * @mixinFunction
  */
 export const OverlayMixin = dedupeMixin(
@@ -178,7 +178,7 @@ export const OverlayMixin = dedupeMixin(
         // When we reconnect, this is for recovering from disconnectedCallback --> teardown which removes the
         // the content node wrapper contents (which is necessary for global overlays to remove them from bottom of body)
         if (this.__tornDown) {
-          this.__reappendContentNodeWrapperNodes();
+          // this.__reappendContentNodeWrapperNodes();
           this.__tornDown = false;
         }
 
