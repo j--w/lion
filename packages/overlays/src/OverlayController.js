@@ -203,6 +203,9 @@ export class OverlayController {
     if (this.contentNode !== this.__prevConfig.contentNode) {
       if (this.config.placementMode === 'global') {
         this._contentNodeWrapper.appendChild(this.contentNode);
+        if (this._renderTarget && this._renderTarget !== this._contentNodeWrapper.parentNode) {
+          this._renderTarget.appendChild(this._contentNodeWrapper);
+        }
       }
     }
   }
@@ -288,11 +291,27 @@ export class OverlayController {
     const event = new CustomEvent('before-show', { cancelable: true });
     this.dispatchEvent(event);
     if (!event.defaultPrevented) {
-      this._contentNodeWrapper.style.display = this.placementMode === 'local' ? 'inline-block' : '';
+      this._contentNodeWrapper.style.display = this.placementMode === 'local' ? 'flex' : '';
+      this._contentNodeWrapper.style.flexDirection = this.getFlexDirectionAccordingToPosition();
       await this._handleFeatures({ phase: 'show' });
       await this._handlePosition({ phase: 'show' });
       this.elementToFocusAfterHide = elementToFocusAfterHide;
       this.dispatchEvent(new Event('show'));
+    }
+  }
+
+  getFlexDirectionAccordingToPosition() {
+    switch (this.config.popperConfig.placement) {
+      case 'top':
+        return 'column-reverse';
+      case 'bottom':
+        return 'column';
+      case 'right':
+        return 'row-reverse';
+      case 'left':
+        return 'row';
+      default:
+        return 'column-reverse';
     }
   }
 
