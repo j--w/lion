@@ -9,37 +9,8 @@ export class LionTooltipArrow extends LitElement {
 
   static get styles() {
     return css`
-      :host {
-        position: absolute;
-        --tooltip-arrow-width: 12px;
-        --tooltip-arrow-height: 8px;
-        width: var(--tooltip-arrow-width);
-        height: var(--tooltip-arrow-height);
-      }
-
       :host svg {
         display: block;
-      }
-
-      :host([placement^='bottom']) {
-        top: calc(-1 * var(--tooltip-arrow-height));
-        transform: rotate(180deg);
-      }
-
-      :host([placement^='left']) {
-        right: calc(
-          -1 * (var(--tooltip-arrow-height) +
-                (var(--tooltip-arrow-width) - var(--tooltip-arrow-height)) / 2)
-        );
-        transform: rotate(270deg);
-      }
-
-      :host([placement^='right']) {
-        left: calc(
-          -1 * (var(--tooltip-arrow-height) +
-                (var(--tooltip-arrow-width) - var(--tooltip-arrow-height)) / 2)
-        );
-        transform: rotate(90deg);
       }
     `;
   }

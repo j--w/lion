@@ -25,6 +25,7 @@ export class OverlayController {
       contentNode: config.contentNode,
       invokerNode: config.invokerNode,
       backdropNode: config.backdropNode,
+      contentNodeWrapper: config.contentNodeWrapper,
       referenceNode: null,
       elementToFocusAfterHide: config.invokerNode,
       inheritsReferenceWidth: '',
@@ -70,7 +71,11 @@ export class OverlayController {
 
     this.manager.add(this);
 
-    this._contentNodeWrapper = document.createElement('div');
+    if (config.placementMode === 'local' && config.contentNodeWrapper) {
+      this._contentNodeWrapper = config.contentNodeWrapper;
+    } else {
+      this._contentNodeWrapper = document.createElement('div');
+    }
     this._contentId = `overlay-content--${Math.random()
       .toString(36)
       .substr(2, 10)}`;
@@ -196,10 +201,9 @@ export class OverlayController {
   __initConnectionTarget() {
     // Now, add our node to the right place in dom (rendeTarget)
     if (this.contentNode !== this.__prevConfig.contentNode) {
-      this._contentNodeWrapper.appendChild(this.contentNode);
-    }
-    if (this._renderTarget && this._renderTarget !== this._contentNodeWrapper.parentNode) {
-      this._renderTarget.appendChild(this._contentNodeWrapper);
+      if (this.config.placementMode === 'global') {
+        this._contentNodeWrapper.appendChild(this.contentNode);
+      }
     }
   }
 
@@ -215,7 +219,7 @@ export class OverlayController {
     this._contentNodeWrapper.style.display = 'none';
 
     // Make sure that your shadow dom contains this outlet, when we are adding to light dom
-    this._contentNodeWrapper.slot = '_overlay-shadow-outlet';
+    // this._contentNodeWrapper.slot = '_overlay-shadow-outlet';
 
     if (getComputedStyle(this.contentNode).position === 'absolute') {
       // Having a _contWrapperNode and a contentNode with 'position:absolute' results in
@@ -432,7 +436,7 @@ export class OverlayController {
             this.backdropNode = document.createElement('div');
             this.backdropNode.classList.add('local-overlays__backdrop');
           }
-          this.backdropNode.slot = '_overlay-shadow-outlet';
+          // this.backdropNode.slot = '_overlay-shadow-outlet';
           this._contentNodeWrapper.parentElement.insertBefore(
             this.backdropNode,
             this._contentNodeWrapper,
@@ -462,7 +466,7 @@ export class OverlayController {
       case 'init':
         this.backdropNode = document.createElement('div');
         this.backdropNode.classList.add('global-overlays__backdrop');
-        this.backdropNode.slot = '_overlay-shadow-outlet';
+        // this.backdropNode.slot = '_overlay-shadow-outlet';
         this._contentNodeWrapper.parentElement.insertBefore(
           this.backdropNode,
           this._contentNodeWrapper,
@@ -636,10 +640,6 @@ export class OverlayController {
 
   teardown() {
     this._handleFeatures({ phase: 'teardown' });
-    // IE11 compatibility (does not support `Node.remove()`)
-    if (this._contentNodeWrapper && this._contentNodeWrapper.parentElement) {
-      this._contentNodeWrapper.parentElement.removeChild(this._contentNodeWrapper);
-    }
   }
 
   async __createPopperInstance() {

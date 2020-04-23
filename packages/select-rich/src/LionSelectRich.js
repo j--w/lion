@@ -270,7 +270,9 @@ export class LionSelectRich extends ScopedElementsMixin(
     return html`
       ${this._labelTemplate()} ${this._helpTextTemplate()} ${this._inputGroupTemplate()}
       ${this._feedbackTemplate()}
-      <slot name="_overlay-shadow-outlet"></slot>
+      <div id="overlay-content-node-wrapper">
+        <slot name="input"></slot>
+      </div>
     `;
   }
 
@@ -330,7 +332,9 @@ export class LionSelectRich extends ScopedElementsMixin(
     return html`
       <div class="input-group__input">
         <slot name="invoker"></slot>
-        <slot name="input"></slot>
+        <div id="overlay-content-node-wrapper">
+          <slot name="input"></slot>
+        </div>
       </div>
     `;
   }

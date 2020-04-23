@@ -50,11 +50,12 @@ export const OverlayMixin = dedupeMixin(
        * @returns {OverlayController}
        */
       // eslint-disable-next-line
-      _defineOverlay({ contentNode, invokerNode, backdropNode }) {
+      _defineOverlay({ contentNode, invokerNode, backdropNode, contentNodeWrapper }) {
         return new OverlayController({
           contentNode,
           invokerNode,
           backdropNode,
+          contentNodeWrapper,
           ...this._defineOverlayConfig(), // wc provided in the class as defaults
           ...this.config, // user provided (e.g. in template)
           popperConfig: {
@@ -163,28 +164,14 @@ export const OverlayMixin = dedupeMixin(
         if (this._cachedOverlayContentNode) {
           return this._cachedOverlayContentNode;
         }
-
-        // (@jorenbroekema) This should shadow outlet in between the host and the content slot,
-        // is a problem.
-        // Should simply be Array.from(this.children).find(child => child.slot === 'content')
-        // Issue: https://github.com/ing-bank/lion/issues/382
-        const shadowOutlet = Array.from(this.children).find(
-          child => child.slot === '_overlay-shadow-outlet',
+        this._cachedOverlayContentNode = Array.from(this.children).find(
+          child => child.slot === 'content',
         );
-        if (shadowOutlet) {
-          this._cachedOverlayContentNode = Array.from(shadowOutlet.children).find(
-            child => child.slot === 'content',
-          );
-        } else {
-          this._cachedOverlayContentNode = Array.from(this.children).find(
-            child => child.slot === 'content',
-          );
-        }
         return this._cachedOverlayContentNode;
       }
 
       get _overlayContentNodeWrapper() {
-        return this._overlayContentNode.parentElement;
+        return this.shadowRoot.querySelector('#overlay-content-node-wrapper');
       }
 
       _setupOverlayCtrl() {
@@ -199,6 +186,7 @@ export const OverlayMixin = dedupeMixin(
           contentNode: this._overlayContentNode,
           invokerNode: this._overlayInvokerNode,
           backdropNode: this._overlayBackdropNode,
+          contentNodeWrapper: this._overlayContentNodeWrapper,
         });
         this.__syncToOverlayController();
         this.__setupSyncFromOverlayController();
