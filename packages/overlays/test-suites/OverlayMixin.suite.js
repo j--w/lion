@@ -172,18 +172,14 @@ export function runOverlayMixinSuite({ /* tagString, */ tag, suffix = '' }) {
         // the node that was removed in the teardown but hasn't been garbage collected due to reference to it still existing..
 
         // Find the outlets that are not backdrop outlets
-        const outletsInGlobalRootNode = Array.from(overlays.globalRootNode.children).filter(
-          child =>
-            child.slot === '_overlay-shadow-outlet' &&
-            !child.classList.contains('global-overlays__backdrop'),
+        const overlayContainerNodes = Array.from(overlays.globalRootNode.children).filter(
+          child => !child.classList.contains('global-overlays__backdrop'),
         );
+        expect(overlayContainerNodes.length).to.equal(2);
 
-        // Check the last one, which is the most nested one
-        const lastContentNodeInContainer =
-          outletsInGlobalRootNode[outletsInGlobalRootNode.length - 1];
-        expect(outletsInGlobalRootNode.length).to.equal(2);
+        const lastContentNodeInContainer = overlayContainerNodes[overlayContainerNodes.length - 1];
 
-        // Check that it indeed has the intended content
+        // Check that the last container is the nested one with the intended content
         expect(lastContentNodeInContainer.firstElementChild.innerText).to.equal(
           'content of the nested overlay',
         );

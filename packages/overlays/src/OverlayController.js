@@ -659,6 +659,19 @@ export class OverlayController {
 
   teardown() {
     this._handleFeatures({ phase: 'teardown' });
+
+    // Remove the content node wrapper from the global rootnode
+    this._teardownContentNodeWrapper();
+  }
+
+  _teardownContentNodeWrapper() {
+    if (
+      this.placementMode === 'global' &&
+      this._contentNodeWrapper &&
+      this._contentNodeWrapper.parentNode
+    ) {
+      this._contentNodeWrapper.parentNode.removeChild(this._contentNodeWrapper);
+    }
   }
 
   async __createPopperInstance() {

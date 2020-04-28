@@ -136,7 +136,8 @@ export const OverlayMixin = dedupeMixin(
         this._overlaySetupComplete = new Promise(resolve => {
           this.__overlaySetupCompleteResolve = resolve;
         });
-        // Wait for DOM to be ready before setting up the overlay
+
+        // Wait for DOM to be ready before setting up the overlay, else extensions like rich select breaks
         this.updateComplete.then(() => this._setupOverlayCtrl());
       }
 
@@ -146,8 +147,6 @@ export const OverlayMixin = dedupeMixin(
         }
 
         if (this._overlayCtrl) {
-          this.__tornDown = true;
-          this.__overlayContentNodeWrapperBeforeTeardown = this._overlayContentNodeWrapper;
           this._teardownOverlayCtrl();
         }
       }
@@ -255,14 +254,6 @@ export const OverlayMixin = dedupeMixin(
         } else {
           this._overlayCtrl.hide();
         }
-      }
-
-      // TODO: Simplify this logic of tearing down / reappending overlay content node wrapper
-      // after we have moved this wrapper to ShadowDOM.
-      __reappendContentNodeWrapperNodes() {
-        Array.from(this.__overlayContentNodeWrapperBeforeTeardown.children).forEach(child => {
-          this.appendChild(child);
-        });
       }
     },
 );
