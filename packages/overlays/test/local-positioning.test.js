@@ -1,7 +1,7 @@
 import { expect, fixture, fixtureSync, html } from '@open-wc/testing';
 import Popper from 'popper.js/dist/esm/popper.min.js';
 import { OverlayController } from '../src/OverlayController.js';
-import { normalizeTransformStyle } from '../test-helpers/local-positioning-helpers.js';
+import { normalizeTransformStyle } from './utils-tests/local-positioning-helpers.js';
 
 const withLocalTestConfig = () => ({
   placementMode: 'local',
@@ -46,7 +46,6 @@ describe('Local Positioning', () => {
         </div>
       `);
       await ctrl.show();
-
       expect(normalizeTransformStyle(ctrl.content.style.transform)).to.equal(
         'translate3d(-30px, -38px, 0px)',
         'translate3d should be -30px [to center = (80 - 20)/2*-1] -38px [to place above = 30 + 8 default padding]',

@@ -26,6 +26,7 @@ export class OverlayController {
       invokerNode: config.invokerNode,
       backdropNode: config.backdropNode,
       contentNodeWrapper: config.contentNodeWrapper,
+      contentNodeWrapperInShadow: false,
       referenceNode: null,
       elementToFocusAfterHide: config.invokerNode,
       inheritsReferenceWidth: '',
@@ -199,9 +200,9 @@ export class OverlayController {
   }
 
   __initConnectionTarget() {
-    // Now, add our node to the right place in dom (rendeTarget)
+    // Now, add our node to the right place in dom (renderTarget)
     if (this.contentNode !== this.__prevConfig.contentNode) {
-      if (this.config.placementMode === 'global') {
+      if (!this.config.contentNodeWrapperInShadow || this.config.placementMode === 'global') {
         this._contentNodeWrapper.appendChild(this.contentNode);
         if (this._renderTarget && this._renderTarget !== this._contentNodeWrapper.parentNode) {
           this._renderTarget.appendChild(this._contentNodeWrapper);
