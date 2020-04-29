@@ -1,4 +1,4 @@
-import { html, LitElement, css } from '@lion/core';
+import { css, html, LitElement } from '@lion/core';
 import { OverlayMixin } from '@lion/overlays';
 
 export class LionTooltip extends OverlayMixin(LitElement) {
@@ -100,6 +100,10 @@ export class LionTooltip extends OverlayMixin(LitElement) {
     this.repositionComplete = new Promise(resolve => {
       this.__repositionCompleteResolver = resolve;
     });
+  }
+
+  get __arrowElement() {
+    return this.shadowRoot.querySelector('[data-popper-arrow]');
   }
 
   __syncFromPopperState(data) {

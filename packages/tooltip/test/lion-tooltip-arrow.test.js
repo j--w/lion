@@ -26,10 +26,10 @@ describe('lion-tooltip-arrow', () => {
       </lion-tooltip>
     `);
     el.opened = true;
-    const arrowElement = el.querySelector('lion-tooltip-arrow');
+    const arrowElement = el.__arrowElement;
 
     await el.repositionComplete;
-    expect(arrowElement.getAttribute('placement')).to.equal('right');
+    expect(arrowElement.placement).to.equal('right');
 
     el.config = { popperConfig: { placement: 'bottom' } };
     // TODO: Remove this once changing configurations no longer closes your overlay
@@ -38,7 +38,7 @@ describe('lion-tooltip-arrow', () => {
     el.opened = true;
 
     await el.repositionComplete;
-    expect(arrowElement.getAttribute('placement')).to.equal('bottom');
+    expect(arrowElement.placement).to.equal('bottom');
   });
 
   it('makes sure positioning of the arrow is correct', async () => {
