@@ -260,19 +260,10 @@ export class LionSelectRich extends ScopedElementsMixin(
     });
   }
 
-  get _inputNode() {
-    // In FormControl, we get direct child [slot="input"]. This doesn't work, because the overlay
-    // system wraps it in [slot="_overlay-shadow-outlet"]
-    return this.querySelector('[slot="input"]');
-  }
-
   render() {
     return html`
       ${this._labelTemplate()} ${this._helpTextTemplate()} ${this._inputGroupTemplate()}
       ${this._feedbackTemplate()}
-      <div id="overlay-content-node-wrapper">
-        <slot name="input"></slot>
-      </div>
     `;
   }
 
