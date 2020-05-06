@@ -137,10 +137,9 @@ export class OverlayController {
   updateConfig(cfgToAdd) {
     // Teardown all previous configs
     this._handleFeatures({ phase: 'teardown' });
-
-    if (cfgToAdd.contentNode && cfgToAdd.contentNode.isConnected) {
+    if (cfgToAdd.contentNodeWrapper && cfgToAdd.contentNodeWrapper.isConnected) {
       // We need to keep track of the original local context.
-      this.__originalContentParent = cfgToAdd.contentNode.parentElement;
+      this.__originalContentParent = cfgToAdd.contentNodeWrapper.parentNode;
     }
     this.__prevConfig = this.config || {};
 
@@ -201,13 +200,13 @@ export class OverlayController {
 
   __initConnectionTarget() {
     // Now, add our node to the right place in dom (renderTarget)
-    if (this.contentNode !== this.__prevConfig.contentNode) {
+    if (this._contentNodeWrapper !== this.__prevConfig._contentNodeWrapper) {
       if (!this.config.contentNodeWrapperInShadow || this.config.placementMode === 'global') {
         this._contentNodeWrapper.appendChild(this.contentNode);
-        if (this._renderTarget && this._renderTarget !== this._contentNodeWrapper.parentNode) {
-          this._renderTarget.appendChild(this._contentNodeWrapper);
-        }
       }
+    }
+    if (this._renderTarget && this._renderTarget !== this._contentNodeWrapper.parentNode) {
+      this._renderTarget.appendChild(this._contentNodeWrapper);
     }
   }
 
@@ -293,7 +292,9 @@ export class OverlayController {
     this.dispatchEvent(event);
     if (!event.defaultPrevented) {
       this._contentNodeWrapper.style.display = this.placementMode === 'local' ? 'flex' : '';
-      this._contentNodeWrapper.style.flexDirection = this.getFlexDirectionAccordingToPosition();
+      if (this.placementMode === 'local') {
+        this._contentNodeWrapper.style.flexDirection = this.getFlexDirectionAccordingToPosition();
+      }
       await this._handleFeatures({ phase: 'show' });
       await this._handlePosition({ phase: 'show' });
       this.elementToFocusAfterHide = elementToFocusAfterHide;
@@ -457,7 +458,7 @@ export class OverlayController {
             this.backdropNode.classList.add('local-overlays__backdrop');
           }
           // this.backdropNode.slot = '_overlay-shadow-outlet';
-          this._contentNodeWrapper.parentElement.insertBefore(
+          this._contentNodeWrapper.parentNode.insertBefore(
             this.backdropNode,
             this._contentNodeWrapper,
           );
