@@ -2,54 +2,73 @@ import { css, html, LitElement } from '@lion/core';
 import { OverlayMixin } from '@lion/overlays';
 
 export class LionTooltip extends OverlayMixin(LitElement) {
+  static get properties() {
+    return {
+      hasArrow: {
+        type: Boolean,
+        reflect: true,
+        attribute: 'has-arrow',
+      },
+    };
+  }
+
+  static get styles() {
+    return css`
+      :host {
+        --tooltip-arrow-width: 12px;
+        --tooltip-arrow-height: 8px;
+      }
+
+      :host([hidden]) {
+        display: none;
+      }
+
+      .arrow {
+        position: absolute;
+        width: var(--tooltip-arrow-width);
+        height: var(--tooltip-arrow-height);
+      }
+
+      .arrow svg {
+        display: block;
+      }
+
+      [x-placement^='bottom'] .arrow {
+        top: calc(-1 * var(--tooltip-arrow-height));
+        transform: rotate(180deg);
+      }
+
+      [x-placement^='left'] .arrow {
+        right: calc(
+          -1 * (var(--tooltip-arrow-height) +
+                (var(--tooltip-arrow-width) - var(--tooltip-arrow-height)) / 2)
+        );
+        transform: rotate(270deg);
+      }
+
+      [x-placement^='right'] .arrow {
+        left: calc(
+          -1 * (var(--tooltip-arrow-height) +
+                (var(--tooltip-arrow-width) - var(--tooltip-arrow-height)) / 2)
+        );
+        transform: rotate(90deg);
+      }
+
+      .arrow {
+        display: none;
+      }
+
+      :host([has-arrow]) .arrow {
+        display: block;
+      }
+    `;
+  }
+
   constructor() {
     super();
     this._mouseActive = false;
     this._keyActive = false;
     this.__setupRepositionCompletePromise();
-  }
-
-  static get styles() {
-    return css`
-      .arrow {
-        position: absolute;
-        --tooltip-arrow-width: 12px;
-        --tooltip-arrow-height: 8px;
-        width: var(--tooltip-arrow-width);
-        height: var(--tooltip-arrow-height);
-      }
-      [x-placement='top'] .arrow {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        bottom: calc(-1 * var(--tooltip-arrow-height));
-      }
-      [x-placement='right'] .arrow {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transform: rotate(90deg);
-        left: calc(calc(-1 * var(--tooltip-arrow-width)) + 2px);
-        height: 100%;
-      }
-      [x-placement='bottom'] .arrow {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        transform: rotate(180deg);
-        top: calc(-1 * var(--tooltip-arrow-height));
-      }
-      [x-placement='left'] .arrow {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transform: rotate(-90deg);
-        right: calc(calc(-1 * var(--tooltip-arrow-width)) + 2px);
-        height: 100%;
-      }
-    `;
   }
 
   connectedCallback() {
@@ -62,10 +81,19 @@ export class LionTooltip extends OverlayMixin(LitElement) {
       <slot name="invoker"></slot>
       <div id="overlay-content-node-wrapper">
         <slot name="content"></slot>
-        <div class="arrow" data-popper-arrow>
-          <slot name="arrow"></slot>
+        <div class="arrow" x-arrow>
+          ${this._arrowTemplate()}
         </div>
       </div>
+    `;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  _arrowTemplate() {
+    return html`
+      <svg viewBox="0 0 12 8">
+        <path d="M 0,0 h 12 L 6,8 z"></path>
+      </svg>
     `;
   }
 
@@ -83,7 +111,7 @@ export class LionTooltip extends OverlayMixin(LitElement) {
             enabled: true,
           },
           arrow: {
-            enabled: false,
+            enabled: this.hasArrow,
           },
         },
         onCreate: data => {
@@ -102,16 +130,15 @@ export class LionTooltip extends OverlayMixin(LitElement) {
     });
   }
 
-  get __arrowElement() {
-    return this.shadowRoot.querySelector('[data-popper-arrow]');
+  get _arrowNode() {
+    return this.shadowRoot.querySelector('[x-arrow]');
   }
 
   __syncFromPopperState(data) {
     if (!data) {
       return;
     }
-    if (this.__arrowElement && data.placement !== this.__arrowElement.placement) {
-      this.__arrowElement.placement = data.placement;
+    if (this._arrowNode && data.placement !== this._arrowNode.placement) {
       this.__repositionCompleteResolver(data.placement);
       this.__setupRepositionCompletePromise();
     }

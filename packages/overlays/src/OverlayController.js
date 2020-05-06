@@ -4,7 +4,7 @@ import { containFocus } from './utils/contain-focus.js';
 import './utils/typedef.js';
 
 async function preloadPopper() {
-  return import('popper.js/dist/esm/popper.min.js');
+  return import('popper.js/dist/esm/popper.js');
 }
 
 const GLOBAL_OVERLAYS_CONTAINER_CLASS = 'global-overlays__overlay-container';
@@ -291,29 +291,11 @@ export class OverlayController {
     const event = new CustomEvent('before-show', { cancelable: true });
     this.dispatchEvent(event);
     if (!event.defaultPrevented) {
-      this._contentNodeWrapper.style.display = this.placementMode === 'local' ? 'flex' : '';
-      if (this.placementMode === 'local') {
-        this._contentNodeWrapper.style.flexDirection = this.getFlexDirectionAccordingToPosition();
-      }
+      this._contentNodeWrapper.style.display = '';
       await this._handleFeatures({ phase: 'show' });
       await this._handlePosition({ phase: 'show' });
       this.elementToFocusAfterHide = elementToFocusAfterHide;
       this.dispatchEvent(new Event('show'));
-    }
-  }
-
-  getFlexDirectionAccordingToPosition() {
-    switch (this.config.popperConfig.placement) {
-      case 'top':
-        return 'column-reverse';
-      case 'bottom':
-        return 'column';
-      case 'right':
-        return 'row-reverse';
-      case 'left':
-        return 'row';
-      default:
-        return 'column-reverse';
     }
   }
 
