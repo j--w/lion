@@ -340,6 +340,8 @@ export class LionSelectRich extends ScopedElementsMixin(
   addFormElement(child, indexToInsertAt) {
     super.addFormElement(child, indexToInsertAt);
 
+    console.log('selectRich addFormE');
+
     // we need to adjust the elements being registered
     /* eslint-disable no-param-reassign */
     child.id = child.id || `${this.localName}-option-${uuid()}`;

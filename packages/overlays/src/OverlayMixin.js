@@ -137,6 +137,8 @@ export const OverlayMixin = dedupeMixin(
       }
 
       connectedCallback() {
+        console.log('connected', this.id);
+
         if (super.connectedCallback) {
           super.connectedCallback();
         }
@@ -149,6 +151,8 @@ export const OverlayMixin = dedupeMixin(
       }
 
       disconnectedCallback() {
+        console.log('disconnected', this.id);
+
         if (super.disconnectedCallback) {
           super.disconnectedCallback();
         }
@@ -167,12 +171,11 @@ export const OverlayMixin = dedupeMixin(
       }
 
       get _overlayContentNode() {
-        if (this._cachedOverlayContentNode) {
-          return this._cachedOverlayContentNode;
+        if (!this._cachedOverlayContentNode) {
+          this._cachedOverlayContentNode = Array.from(this.children).find(
+            child => child.slot === 'content',
+          );
         }
-        this._cachedOverlayContentNode = Array.from(this.children).find(
-          child => child.slot === 'content',
-        );
         return this._cachedOverlayContentNode;
       }
 
@@ -192,8 +195,8 @@ export const OverlayMixin = dedupeMixin(
           contentNode: this._overlayContentNode,
           invokerNode: this._overlayInvokerNode,
           backdropNode: this._overlayBackdropNode,
-          contentNodeWrapper: this._overlayContentNodeWrapper,
-          contentNodeWrapperInShadow: true,
+          // contentNodeWrapper: this._overlayContentNodeWrapper,
+          // contentNodeWrapperInShadow: true,
         });
         this.__syncToOverlayController();
         this.__setupSyncFromOverlayController();

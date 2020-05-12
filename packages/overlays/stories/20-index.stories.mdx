@@ -297,7 +297,7 @@ Below is another demo where you can toggle between configurations using buttons.
         Dropdown
       </button>
     </div>
-    <demo-overlay-system id="respSwitchOverlay" .config=${{ ...withBottomSheetConfig() }}>
+    <demo-overlay-system id="respSwitchOverlay" .config=${{ ...withDropdownConfig() }}>
       <button slot="invoker">Click me to open the overlay!</button>
       <div slot="content" class="demo-overlay">
         Hello! You can close this notification here:
@@ -328,7 +328,7 @@ Change config to:
     Dropdown
   </button>
 </div>
-<demo-overlay-system id="respSwitchOverlay" .config=${{ ...withBottomSheetConfig() }}>
+<demo-overlay-system id="respSwitchOverlay" .config=${{ ...withDropdownConfig() }}>
   <button slot="invoker">Click me to open the overlay!</button>
   <div slot="content" class="demo-overlay">
     Hello! You can close this notification here:

@@ -50,6 +50,7 @@ export const FormRegisteringMixin = dedupeMixin(
             bubbles: true,
           }),
         );
+        console.log('_dispatchRegistration', this);
         formRegistrarManager.removeEventListener(
           'all-forms-open-for-registration',
           this.__boundDispatchRegistration,

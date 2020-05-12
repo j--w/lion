@@ -72,7 +72,7 @@ describe('OverlayController', () => {
         }
         if (mode === 'inline') {
           contentNode = await fixture(html`
-            <div style="z-index:${zIndexVal};">
+            <div style="z-index: ${zIndexVal} ;">
               I should be on top
             </div>
           `);
@@ -190,6 +190,31 @@ describe('OverlayController', () => {
         invokerNode: await fixture('<button>invoke</button>'),
       });
       expect(ctrl.invokerNode).to.have.trimmed.text('invoke');
+    });
+
+    describe('When contentNodeWrapper projects contentNode', () => {
+      it('retrieves contentNodeWrapper from dom structure when', async () => {
+        const shadowHost = document.createElement('div');
+        shadowHost.attachShadow({ mode: 'open' });
+        shadowHost.shadowRoot.innerHTML = `
+          <div id="contentNodeWrapper">
+            <slot name="contentNode"></slot>
+            <my-arrow></my-arrow>
+          </div>
+        `;
+        const contentNode = document.createElement('div');
+        contentNode.slot = 'contentNode';
+        shadowHost.appendChild(contentNode);
+
+        const ctrl = new OverlayController({
+          ...withLocalTestConfig(),
+          contentNode,
+        });
+
+        const contentNodeWrapper = shadowHost.shadowRoot.getElementById('contentNodeWrapper');
+        expect(ctrl.__isContentNodeProjected).to.be.true;
+        expect(ctrl._contentNodeWrapper).to.equal(contentNodeWrapper);
+      });
     });
   });
 

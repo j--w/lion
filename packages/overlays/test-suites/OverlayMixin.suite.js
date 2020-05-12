@@ -32,7 +32,7 @@ export function runOverlayMixinSuite({ /* tagString, */ tag, suffix = '' }) {
       expect(el._overlayCtrl.isShown).to.be.false;
     });
 
-    it('syncs overlayController to opened', async () => {
+    it('syncs OverlayController to opened', async () => {
       expect(el.opened).to.be.false;
       await el._overlayCtrl.show();
       expect(el.opened).to.be.true;
@@ -149,17 +149,20 @@ export function runOverlayMixinSuite({ /* tagString, */ tag, suffix = '' }) {
   });
 
   describe(`OverlayMixin${suffix} nested`, () => {
+    before(() => {
+      console.log('======================================');
+    });
     it('reconstructs the overlay when disconnected and reconnected to DOM (support for nested overlay nodes)', async () => {
       const nestedEl = await fixture(html`
-        <${tag}>
-          <div slot="content">content of the nested overlay</div>
+        <${tag} id="nest">
+          <div slot="content" id="nestedContent">content of the nested overlay</div>
           <button slot="invoker">invoker nested</button>
         </${tag}>
       `);
 
       const mainEl = await fixture(html`
-        <${tag}>
-          <div slot="content">
+        <${tag} id="main">
+          <div slot="content" id="mainContent">
             open nested overlay:
             ${nestedEl}
           </div>
@@ -186,6 +189,9 @@ export function runOverlayMixinSuite({ /* tagString, */ tag, suffix = '' }) {
         expect(lastContentNodeInContainer.firstElementChild.slot).to.equal('content');
       } else {
         const actualNestedOverlay = mainEl._overlayContentNode.firstElementChild;
+
+        console.log('actualNestedOverlay', actualNestedOverlay);
+
         const contentNode = Array.from(actualNestedOverlay.children).find(
           child => child.slot === 'content',
         );
