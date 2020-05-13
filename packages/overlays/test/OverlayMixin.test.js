@@ -17,7 +17,9 @@ const tagString = defineCE(
 );
 const tag = unsafeStatic(tagString);
 
-runOverlayMixinSuite({
-  tagString,
-  tag,
+describe('OverlayMixin integrations', () => {
+  runOverlayMixinSuite({
+    tagString,
+    tag,
+  });
 });

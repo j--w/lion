@@ -149,9 +149,6 @@ export function runOverlayMixinSuite({ /* tagString, */ tag, suffix = '' }) {
   });
 
   describe(`OverlayMixin${suffix} nested`, () => {
-    before(() => {
-      console.log('======================================');
-    });
     it('reconstructs the overlay when disconnected and reconnected to DOM (support for nested overlay nodes)', async () => {
       const nestedEl = await fixture(html`
         <${tag} id="nest">
@@ -180,23 +177,15 @@ export function runOverlayMixinSuite({ /* tagString, */ tag, suffix = '' }) {
         );
         expect(overlayContainerNodes.length).to.equal(2);
 
-        const lastContentNodeInContainer = overlayContainerNodes[overlayContainerNodes.length - 1];
-
+        const lastContentNodeInContainer = overlayContainerNodes[0];
         // Check that the last container is the nested one with the intended content
         expect(lastContentNodeInContainer.firstElementChild.innerText).to.equal(
           'content of the nested overlay',
         );
         expect(lastContentNodeInContainer.firstElementChild.slot).to.equal('content');
       } else {
-        const actualNestedOverlay = mainEl._overlayContentNode.firstElementChild;
-
-        console.log('actualNestedOverlay', actualNestedOverlay);
-
-        const contentNode = Array.from(actualNestedOverlay.children).find(
-          child => child.slot === 'content',
-        );
-
-        expect(contentNode).to.not.be.undefined;
+        const contentNode = mainEl._overlayContentNode.querySelector('#nestedContent');
+        expect(contentNode).to.not.be.null;
         expect(contentNode.innerText).to.equal('content of the nested overlay');
       }
     });

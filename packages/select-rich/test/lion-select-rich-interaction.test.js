@@ -601,11 +601,11 @@ describe('lion-select-rich interactions', () => {
 
     it('puts "aria-posinset" on all options to indicate their position in the listbox', async () => {
       const el = await fixture(html`
-        <lion-select-rich>
+        <lion-select-rich id="select-rich">
           <lion-options slot="input">
-            <lion-option .choiceValue=${10}>Item 1</lion-option>
-            <lion-option .choiceValue=${20}>Item 2</lion-option>
-            <lion-option .choiceValue=${30}>Item 3</lion-option>
+            <lion-option .choiceValue=${10} id="option-1">Item 1</lion-option>
+            <lion-option .choiceValue=${20} id="option-2">Item 2</lion-option>
+            <lion-option .choiceValue=${30} id="option-3">Item 3</lion-option>
           </lion-options>
         </lion-select-rich>
       `);

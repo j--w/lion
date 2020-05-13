@@ -137,8 +137,6 @@ export const OverlayMixin = dedupeMixin(
       }
 
       connectedCallback() {
-        console.log('connected', this.id);
-
         if (super.connectedCallback) {
           super.connectedCallback();
         }
@@ -147,18 +145,45 @@ export const OverlayMixin = dedupeMixin(
         });
 
         // Wait for DOM to be ready before setting up the overlay, else extensions like rich select breaks
-        this.updateComplete.then(() => this._setupOverlayCtrl());
+        this.updateComplete.then(() => {
+          if (!this.__isOverlaySetup) {
+            this._setupOverlayCtrl();
+          }
+        });
+
+        // When dom nodes are being moved around (meaning connected/disconnected are being fired
+        // repeatedly), we need to delay the teardown until we find a 'permanent disconnect'
+        if (this.__rejectOverlayDisconnectComplete) {
+          // make sure this._overlayDisconnectComplete never resolves
+          this.__rejectOverlayDisconnectComplete();
+        }
       }
 
       disconnectedCallback() {
-        console.log('disconnected', this.id);
-
         if (super.disconnectedCallback) {
           super.disconnectedCallback();
         }
 
+        this._overlayDisconnectComplete = new Promise((resolve, reject) => {
+          this.__resolveOverlayDisconnectComplete = resolve;
+          this.__rejectOverlayDisconnectComplete = reject;
+        });
+
+        this.updateComplete.then(() => {
+          // we start the teardown below
+          this.updateComplete.then(() => {
+            this.__resolveOverlayDisconnectComplete();
+          });
+        });
+
         if (this._overlayCtrl) {
-          this._teardownOverlayCtrl();
+          // We need to prevent that we create a setup/teardown cycle during startup, where it
+          // is common that the overlay system moves around nodes. Therefore, we make the
+          // teardown async, so that it only happens when we are permanently disconnecting from dom
+          // (and not when we are moving nodes around)
+          this._overlayDisconnectComplete.then(() => {
+            this._teardownOverlayCtrl();
+          });
         }
       }
 
@@ -184,30 +209,23 @@ export const OverlayMixin = dedupeMixin(
       }
 
       _setupOverlayCtrl() {
-        // When we reconnect, this is for recovering from disconnectedCallback --> teardown which removes the
-        // the content node wrapper contents (which is necessary for global overlays to remove them from bottom of body)
-        if (this.__tornDown) {
-          // this.__reappendContentNodeWrapperNodes();
-          this.__tornDown = false;
-        }
-
         this._overlayCtrl = this._defineOverlay({
           contentNode: this._overlayContentNode,
           invokerNode: this._overlayInvokerNode,
           backdropNode: this._overlayBackdropNode,
-          // contentNodeWrapper: this._overlayContentNodeWrapper,
-          // contentNodeWrapperInShadow: true,
         });
         this.__syncToOverlayController();
         this.__setupSyncFromOverlayController();
         this._setupOpenCloseListeners();
         this.__overlaySetupCompleteResolve();
+        this.__isOverlaySetup = true;
       }
 
       _teardownOverlayCtrl() {
         this._teardownOpenCloseListeners();
         this.__teardownSyncFromOverlayController();
         this._overlayCtrl.teardown();
+        this.__isOverlaySetup = false;
       }
 
       async _setOpenedWithoutPropertyEffects(newOpened) {

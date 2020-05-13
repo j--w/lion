@@ -340,8 +340,6 @@ export class LionSelectRich extends ScopedElementsMixin(
   addFormElement(child, indexToInsertAt) {
     super.addFormElement(child, indexToInsertAt);
 
-    console.log('selectRich addFormE');
-
     // we need to adjust the elements being registered
     /* eslint-disable no-param-reassign */
     child.id = child.id || `${this.localName}-option-${uuid()}`;
@@ -361,8 +359,12 @@ export class LionSelectRich extends ScopedElementsMixin(
       this.__hasInitialSelectedFormElement = true;
     }
 
+    // TODO: small perf improvement could be made if logic below would be scheduled to next update,
+    // so it occurs once for all options
     this.__setAttributeForAllFormElements('aria-setsize', this.formElements.length);
-    child.setAttribute('aria-posinset', this.formElements.length);
+    this.formElements.forEach((el, idx) => {
+      el.setAttribute('aria-posinset', idx + 1);
+    });
 
     this.__proxyChildModelValueChanged({ target: child });
     this.resetInteractionState();

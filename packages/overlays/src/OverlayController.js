@@ -247,25 +247,22 @@ export class OverlayController {
   // }
 
   __initConnectionTarget() {
-    // console.log('__initConnectionTarget');
     // Now, add our node to the right place in dom (renderTarget)
     if (this._contentNodeWrapper !== this.__prevConfig._contentNodeWrapper) {
-      if (this.config.placementMode === 'global') {
-        console.log('append', this.contentNode.id);
+      if (this.config.placementMode === 'global' || !this.__isContentNodeProjected) {
         this._contentNodeWrapper.appendChild(this.contentNode);
       }
-      // else if (!this.__isContentNodeProjected) {
-      //   this._contentNodeWrapper.appendChild(this.contentNode);
-      // }
     }
 
-    const isInsideRenderTarget = this._renderTarget === this._contentNodeWrapper.parentNode;
     if (this.__isContentNodeProjected && this.placementMode === 'local') {
-      console.log('this._renderTarget', this._renderTarget);
+      // We add the contentNode in its slot, so that it will be projected by contentNodeWrapper
       this._renderTarget.appendChild(this.contentNode);
-    } else if (!isInsideRenderTarget) {
-      console.log('this._renderTarget !isInsideRenderTarget', this._renderTarget);
-      this._renderTarget.appendChild(this._contentNodeWrapper);
+    } else {
+      const isInsideRenderTarget = this._renderTarget === this._contentNodeWrapper.parentNode;
+      if (!isInsideRenderTarget) {
+        // ContentNodeWrapper becomes the direct (non projected) parent of contentNode
+        this._renderTarget.appendChild(this._contentNodeWrapper);
+      }
     }
   }
 
@@ -274,15 +271,11 @@ export class OverlayController {
    * can lead to problems with event listeners...
    */
   __initContentNodeWrapper({ cfgToAdd }) {
-    console.log('this.__isContentNodeProjected', this.__isContentNodeProjected);
     if (this.__isContentNodeProjected && this.placementMode === 'local') {
       this._contentNodeWrapper = this.__contentNodeWrapperLocal;
     } else {
-      console.log('not in shadow', this.contentNode.id);
       this._contentNodeWrapper = document.createElement('div');
     }
-
-    console.log('this._contentNodeWrapper', this._contentNodeWrapper);
 
     // Array.from(this._contentNodeWrapper.attributes).forEach(attrObj => {
     //   this._contentNodeWrapper.removeAttribute(attrObj.name);
@@ -546,8 +539,6 @@ export class OverlayController {
       case 'init':
         this.backdropNode = document.createElement('div');
         this.backdropNode.classList.add('global-overlays__backdrop');
-        // this.backdropNode.slot = '_overlay-shadow-outlet';
-        console.log('this._contentNodeWrapper', this._contentNodeWrapper);
         this._contentNodeWrapper.parentElement.insertBefore(
           this.backdropNode,
           this._contentNodeWrapper,
