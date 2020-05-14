@@ -114,9 +114,7 @@ export class OverlayController {
 
     if (this._defaultConfig.contentNode) {
       this.__isContentNodeProjected = Boolean(this._defaultConfig.contentNode.assignedSlot);
-      if (this._defaultConfig.contentNodeWrapper) {
-        this.__contentNodeWrapperLocal = this._defaultConfig.contentNodeWrapper;
-      } else if (this.__isContentNodeProjected) {
+      if (this.__isContentNodeProjected) {
         this.__contentNodeWrapperLocal = this._defaultConfig.contentNode.assignedSlot.parentNode;
       }
     }
