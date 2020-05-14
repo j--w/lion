@@ -11,7 +11,8 @@ const GLOBAL_OVERLAYS_CONTAINER_CLASS = 'global-overlays__overlay-container';
 const GLOBAL_OVERLAYS_CLASS = 'global-overlays__overlay';
 
 /**
- * About `contentNode`, `_contentNodeWrapper` and `_renderTarget`.
+ * # About `contentNode`, `_contentNodeWrapper` and `_renderTarget`.
+ *
  * There are subtle differences depending on the following factors:
  * - whether in global/local placement mode
  * - whether contentNode projected (`<div id="contentNodeWrapper"><slot name="contentNode"></slot></div>`)
@@ -56,6 +57,10 @@ export class OverlayController {
     this._defaultConfig = {
       placementMode: null,
       contentNode: config.contentNode,
+      // For local config, a contentNodeWrapper can be provided. This is needed for
+      // non projected content nodes with an arrow (in other cases contentNodeWrapper will be
+      // found or created by OverlayController).
+      contentNodeWrapper: config.contentNodeWrapper,
       invokerNode: config.invokerNode,
       backdropNode: config.backdropNode,
       referenceNode: null,
@@ -103,20 +108,15 @@ export class OverlayController {
 
     this.manager.add(this);
 
-    // if (config.placementMode === 'local' && config.contentNodeWrapper) {
-    //   this._contentNodeWrapper = config.contentNodeWrapper;
-    // } else {
-
-    // if (this._contentNodeWrapper) {}
-    // this._contentNodeWrapper = document.createElement('div');
-    // }
     this._contentId = `overlay-content--${Math.random()
       .toString(36)
       .substr(2, 10)}`;
 
     if (this._defaultConfig.contentNode) {
       this.__isContentNodeProjected = Boolean(this._defaultConfig.contentNode.assignedSlot);
-      if (this.__isContentNodeProjected) {
+      if (this._defaultConfig.contentNodeWrapper) {
+        this.__contentNodeWrapperLocal = this._defaultConfig.contentNodeWrapper;
+      } else if (this.__isContentNodeProjected) {
         this.__contentNodeWrapperLocal = this._defaultConfig.contentNode.assignedSlot.parentNode;
       }
     }
@@ -238,14 +238,6 @@ export class OverlayController {
     this._handleFeatures({ phase: 'init' });
   }
 
-  // get __isContentNodeProjected() {
-  //   const slot = Array.from(this._contentNodeWrapper.children).find(el => el.tagName === 'SLOT');
-  //   if (slot) {
-  //     return slot.assignedNodes().includes(this.contentNode);
-  //   }
-  //   return false;
-  // }
-
   __initConnectionTarget() {
     // Now, add our node to the right place in dom (renderTarget)
     if (this._contentNodeWrapper !== this.__prevConfig._contentNodeWrapper) {
@@ -273,13 +265,12 @@ export class OverlayController {
   __initContentNodeWrapper({ cfgToAdd }) {
     if (this.__isContentNodeProjected && this.placementMode === 'local') {
       this._contentNodeWrapper = this.__contentNodeWrapperLocal;
+    } else if (this.config.contentNodeWrapper && this.placementMode === 'local') {
+      this._contentNodeWrapper = this.config.contentNodeWrapper;
     } else {
       this._contentNodeWrapper = document.createElement('div');
     }
 
-    // Array.from(this._contentNodeWrapper.attributes).forEach(attrObj => {
-    //   this._contentNodeWrapper.removeAttribute(attrObj.name);
-    // });
     this._contentNodeWrapper.style.cssText = null;
     this._contentNodeWrapper.style.display = 'none';
 

@@ -169,11 +169,9 @@ export const OverlayMixin = dedupeMixin(
           this.__rejectOverlayDisconnectComplete = reject;
         });
 
-        this.updateComplete.then(() => {
+        setTimeout(() => {
           // we start the teardown below
-          this.updateComplete.then(() => {
-            this.__resolveOverlayDisconnectComplete();
-          });
+          this.__resolveOverlayDisconnectComplete();
         });
 
         if (this._overlayCtrl) {

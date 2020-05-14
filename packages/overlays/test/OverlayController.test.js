@@ -193,7 +193,7 @@ describe('OverlayController', () => {
     });
 
     describe('When contentNodeWrapper projects contentNode', () => {
-      it('retrieves contentNodeWrapper from dom structure when', async () => {
+      it('retrieves contentNodeWrapper from dom structure for local positioning', async () => {
         const shadowHost = document.createElement('div');
         shadowHost.attachShadow({ mode: 'open' });
         shadowHost.shadowRoot.innerHTML = `
@@ -213,6 +213,28 @@ describe('OverlayController', () => {
 
         const contentNodeWrapper = shadowHost.shadowRoot.getElementById('contentNodeWrapper');
         expect(ctrl.__isContentNodeProjected).to.be.true;
+        expect(ctrl._contentNodeWrapper).to.equal(contentNodeWrapper);
+      });
+    });
+
+    describe('When contentNodeWrapper needs to be provided for correct arrow positioning', () => {
+      it('uses contentNodeWrapper as provided for local positioning', async () => {
+        const el = await fixture(html`
+          <div id="contentNodeWrapper">
+            <div id="contentNode"></div>
+            <my-arrow></my-arrow>
+          </div>
+        `);
+
+        const contentNode = el.querySelector('#contentNode');
+        const contentNodeWrapper = el;
+
+        const ctrl = new OverlayController({
+          ...withLocalTestConfig(),
+          contentNode,
+          contentNodeWrapper,
+        });
+
         expect(ctrl._contentNodeWrapper).to.equal(contentNodeWrapper);
       });
     });
