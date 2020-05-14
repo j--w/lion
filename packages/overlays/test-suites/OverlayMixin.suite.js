@@ -2,7 +2,13 @@ import { expect, fixture, html, nextFrame, aTimeout } from '@open-wc/testing';
 import sinon from 'sinon';
 import { overlays } from '../src/overlays.js';
 
-export function runOverlayMixinSuite({ /* tagString, */ tag, suffix = '' }) {
+function getGlobalOverlayNodes() {
+  return Array.from(overlays.globalRootNode.children).filter(
+    child => !child.classList.contains('global-overlays__backdrop'),
+  );
+}
+
+export function runOverlayMixinSuite({ tagString, tag, suffix = '' }) {
   describe(`OverlayMixin${suffix}`, () => {
     let el;
 
@@ -149,6 +155,35 @@ export function runOverlayMixinSuite({ /* tagString, */ tag, suffix = '' }) {
   });
 
   describe(`OverlayMixin${suffix} nested`, () => {
+    it('supports nested overlays', async () => {
+      const el = await fixture(html`
+        <${tag}>
+          <div slot="content" id="mainContent">
+            open nested overlay:
+            <${tag}>
+              <div slot="content" id="nestedContent">
+                Nested content
+              </div>
+              <button slot="invoker" id="nestedInvoker">nested invoker button</button>
+            </${tag}>
+          </div>
+          <button slot="invoker" id="mainInvoker">invoker button</button>
+        </${tag}>
+      `);
+
+      if (el._overlayCtrl.placementMode === 'global') {
+        expect(getGlobalOverlayNodes().length).to.equal(2);
+      }
+
+      el.opened = true;
+      await aTimeout();
+      expect(el._overlayCtrl.contentNode).to.be.displayed;
+      const nestedOverlayEl = el._overlayCtrl.contentNode.querySelector(tagString);
+      nestedOverlayEl.opened = true;
+      await aTimeout();
+      expect(nestedOverlayEl._overlayCtrl.contentNode).to.be.displayed;
+    });
+
     it('reconstructs the overlay when disconnected and reconnected to DOM (support for nested overlay nodes)', async () => {
       const nestedEl = await fixture(html`
         <${tag} id="nest">
@@ -172,11 +207,8 @@ export function runOverlayMixinSuite({ /* tagString, */ tag, suffix = '' }) {
         // the node that was removed in the teardown but hasn't been garbage collected due to reference to it still existing..
 
         // Find the outlets that are not backdrop outlets
-        const overlayContainerNodes = Array.from(overlays.globalRootNode.children).filter(
-          child => !child.classList.contains('global-overlays__backdrop'),
-        );
+        const overlayContainerNodes = getGlobalOverlayNodes();
         expect(overlayContainerNodes.length).to.equal(2);
-
         const lastContentNodeInContainer = overlayContainerNodes[0];
         // Check that the last container is the nested one with the intended content
         expect(lastContentNodeInContainer.firstElementChild.innerText).to.equal(

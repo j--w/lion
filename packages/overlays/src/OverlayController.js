@@ -263,19 +263,16 @@ export class OverlayController {
    * can lead to problems with event listeners...
    */
   __initContentNodeWrapper({ cfgToAdd }) {
-    if (this.__isContentNodeProjected && this.placementMode === 'local') {
-      this._contentNodeWrapper = this.__contentNodeWrapperLocal;
-    } else if (this.config.contentNodeWrapper && this.placementMode === 'local') {
+    if (this.config.contentNodeWrapper && this.placementMode === 'local') {
       this._contentNodeWrapper = this.config.contentNodeWrapper;
+    } else if (this.__isContentNodeProjected && this.placementMode === 'local') {
+      this._contentNodeWrapper = this.__contentNodeWrapperLocal;
     } else {
       this._contentNodeWrapper = document.createElement('div');
     }
 
     this._contentNodeWrapper.style.cssText = null;
     this._contentNodeWrapper.style.display = 'none';
-
-    // Make sure that your shadow dom contains this outlet, when we are adding to light dom
-    // this._contentNodeWrapper.slot = '_overlay-shadow-outlet';
 
     if (getComputedStyle(this.contentNode).position === 'absolute') {
       // Having a _contWrapperNode and a contentNode with 'position:absolute' results in
