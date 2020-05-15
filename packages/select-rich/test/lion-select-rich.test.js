@@ -767,13 +767,13 @@ describe('lion-select-rich', () => {
     it('allows to override the type of overlay', async () => {
       const mySelectTagString = defineCE(
         class MySelect extends LionSelectRich {
-          _defineOverlay({ invokerNode, contentNode }) {
+          _defineOverlay({ invokerNode, contentNode, contentWrapperNode }) {
             const ctrl = new OverlayController({
               placementMode: 'global',
               contentNode,
+              contentWrapperNode,
               invokerNode,
             });
-
             this.addEventListener('switch', () => {
               ctrl.updateConfig({ placementMode: 'local' });
             });
@@ -795,7 +795,7 @@ describe('lion-select-rich', () => {
           </lion-options>
         </${mySelectTag}>
       `);
-
+      await el.updateComplete;
       expect(el._overlayCtrl.placementMode).to.equal('global');
       el.dispatchEvent(new Event('switch'));
       expect(el._overlayCtrl.placementMode).to.equal('local');

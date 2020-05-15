@@ -121,6 +121,7 @@ export class OverlaysManager {
     });
 
     this.__list = [];
+    /** @type {OverlayController[]} */
     this.__shownList = [];
     this.__siblingsInert = false;
 

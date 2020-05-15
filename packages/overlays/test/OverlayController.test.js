@@ -164,7 +164,7 @@ describe('OverlayController', () => {
 
   // TODO: Add teardown feature tests
   describe('Teardown', () => {
-    it('removes the contentNodeWrapper from global rootnode upon teardown', async () => {
+    it('removes the contentWrapperNode from global rootnode upon teardown', async () => {
       const ctrl = new OverlayController({
         ...withGlobalTestConfig(),
       });
@@ -192,12 +192,12 @@ describe('OverlayController', () => {
       expect(ctrl.invokerNode).to.have.trimmed.text('invoke');
     });
 
-    describe('When contentNodeWrapper projects contentNode', () => {
-      it('retrieves contentNodeWrapper from dom structure for local positioning', async () => {
+    describe('When contentWrapperNode projects contentNode', () => {
+      it('recognizes projected contentNode', async () => {
         const shadowHost = document.createElement('div');
         shadowHost.attachShadow({ mode: 'open' });
         shadowHost.shadowRoot.innerHTML = `
-          <div id="contentNodeWrapper">
+          <div id="contentWrapperNode">
             <slot name="contentNode"></slot>
             <my-arrow></my-arrow>
           </div>
@@ -209,33 +209,32 @@ describe('OverlayController', () => {
         const ctrl = new OverlayController({
           ...withLocalTestConfig(),
           contentNode,
+          contentWrapperNode: shadowHost.shadowRoot.getElementById('contentWrapperNode'),
         });
 
-        const contentNodeWrapper = shadowHost.shadowRoot.getElementById('contentNodeWrapper');
         expect(ctrl.__isContentNodeProjected).to.be.true;
-        expect(ctrl._contentNodeWrapper).to.equal(contentNodeWrapper);
       });
     });
 
-    describe('When contentNodeWrapper needs to be provided for correct arrow positioning', () => {
-      it('uses contentNodeWrapper as provided for local positioning', async () => {
+    describe('When contentWrapperNode needs to be provided for correct arrow positioning', () => {
+      it('uses contentWrapperNode as provided for local positioning', async () => {
         const el = await fixture(html`
-          <div id="contentNodeWrapper">
+          <div id="contentWrapperNode">
             <div id="contentNode"></div>
             <my-arrow></my-arrow>
           </div>
         `);
 
         const contentNode = el.querySelector('#contentNode');
-        const contentNodeWrapper = el;
+        const contentWrapperNode = el;
 
         const ctrl = new OverlayController({
           ...withLocalTestConfig(),
           contentNode,
-          contentNodeWrapper,
+          contentWrapperNode,
         });
 
-        expect(ctrl._contentNodeWrapper).to.equal(contentNodeWrapper);
+        expect(ctrl._contentWrapperNode).to.equal(contentWrapperNode);
       });
     });
   });
@@ -1061,13 +1060,13 @@ describe('OverlayController', () => {
 
       ctrl.show();
       expect(
-        ctrl._contentNodeWrapper.classList.contains('global-overlays__overlay-container--center'),
+        ctrl._contentWrapperNode.classList.contains('global-overlays__overlay-container--center'),
       );
       expect(ctrl.isShown).to.be.true;
 
       ctrl.updateConfig({ viewportConfig: { placement: 'top-right' } });
       expect(
-        ctrl._contentNodeWrapper.classList.contains(
+        ctrl._contentWrapperNode.classList.contains(
           'global-overlays__overlay-container--top-right',
         ),
       );
@@ -1263,6 +1262,27 @@ describe('OverlayController', () => {
           placementMode: 'global',
         });
       }).to.throw('You need to provide a .contentNode');
+    });
+
+    it('throws if contentNodewrapper is not provided for projected contentNode', async () => {
+      const shadowHost = document.createElement('div');
+      shadowHost.attachShadow({ mode: 'open' });
+      shadowHost.shadowRoot.innerHTML = `
+        <div id="contentWrapperNode">
+          <slot name="contentNode"></slot>
+          <my-arrow></my-arrow>
+        </div>
+      `;
+      const contentNode = document.createElement('div');
+      contentNode.slot = 'contentNode';
+      shadowHost.appendChild(contentNode);
+
+      expect(() => {
+        new OverlayController({
+          ...withLocalTestConfig(),
+          contentNode,
+        });
+      }).to.throw('You need to provide a .contentWrapperNode when .contentNode is projected');
     });
   });
 });

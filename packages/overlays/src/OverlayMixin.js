@@ -23,6 +23,10 @@ export const OverlayMixin = dedupeMixin(
         super();
         this.opened = false;
         this.config = {};
+
+        this._overlaySetupComplete = new Promise(resolve => {
+          this.__overlaySetupCompleteResolve = resolve;
+        });
       }
 
       get config() {
@@ -50,19 +54,12 @@ export const OverlayMixin = dedupeMixin(
        * @returns {OverlayController}
        */
       // eslint-disable-next-line
-      _defineOverlay({
-        contentNode,
-        invokerNode,
-        backdropNode,
-        contentNodeWrapper,
-        contentNodeWrapperInShadow,
-      }) {
+      _defineOverlay({ contentNode, invokerNode, backdropNode, contentWrapperNode }) {
         return new OverlayController({
           contentNode,
           invokerNode,
           backdropNode,
-          contentNodeWrapper,
-          contentNodeWrapperInShadow,
+          contentWrapperNode,
           ...this._defineOverlayConfig(), // wc provided in the class as defaults
           ...this.config, // user provided (e.g. in template)
           popperConfig: {
@@ -136,13 +133,10 @@ export const OverlayMixin = dedupeMixin(
         }
       }
 
-      connectedCallback() {
+      async connectedCallback() {
         if (super.connectedCallback) {
           super.connectedCallback();
         }
-        this._overlaySetupComplete = new Promise(resolve => {
-          this.__overlaySetupCompleteResolve = resolve;
-        });
 
         // Wait for DOM to be ready before setting up the overlay, else extensions like rich select breaks
         this.updateComplete.then(() => {
@@ -154,7 +148,7 @@ export const OverlayMixin = dedupeMixin(
         // When dom nodes are being moved around (meaning connected/disconnected are being fired
         // repeatedly), we need to delay the teardown until we find a 'permanent disconnect'
         if (this.__rejectOverlayDisconnectComplete) {
-          // make sure this._overlayDisconnectComplete never resolves
+          // makes sure _overlayDisconnectComplete never resolves: we don't want a teardown
           this.__rejectOverlayDisconnectComplete();
         }
       }
@@ -178,7 +172,6 @@ export const OverlayMixin = dedupeMixin(
           // We need to prevent that we create a setup/teardown cycle during startup, where it
           // is common that the overlay system moves around nodes. Therefore, we make the
           // teardown async, so that it only happens when we are permanently disconnecting from dom
-          // (and not when we are moving nodes around)
           this._overlayDisconnectComplete.then(() => {
             this._teardownOverlayCtrl();
           });
@@ -202,13 +195,14 @@ export const OverlayMixin = dedupeMixin(
         return this._cachedOverlayContentNode;
       }
 
-      get _overlayContentNodeWrapper() {
+      get _overlayContentWrapperNode() {
         return this.shadowRoot.querySelector('#overlay-content-node-wrapper');
       }
 
       _setupOverlayCtrl() {
         this._overlayCtrl = this._defineOverlay({
           contentNode: this._overlayContentNode,
+          contentWrapperNode: this._overlayContentWrapperNode,
           invokerNode: this._overlayInvokerNode,
           backdropNode: this._overlayBackdropNode,
         });
@@ -226,6 +220,12 @@ export const OverlayMixin = dedupeMixin(
         this.__isOverlaySetup = false;
       }
 
+      /**
+       * When the opened state is changed by an Application Developer,cthe OverlayController is
+       * requested to show/hide. It might happen that this request is not honoured
+       * (intercepted in before-hide for instance), so that we need to sync the controller state
+       * to this webcomponent again, preventing eternal loops.
+       */
       async _setOpenedWithoutPropertyEffects(newOpened) {
         this.__blockSyncToOverlayCtrl = true;
         this.opened = newOpened;

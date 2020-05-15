@@ -72,9 +72,11 @@ export function runOverlayMixinSuite({ tagString, tag, suffix = '' }) {
       `);
       expect(spy).not.to.have.been.called;
       await el._overlayCtrl.show();
+      await el.updateComplete;
       expect(spy.callCount).to.equal(1);
       expect(el.opened).to.be.true;
       await el._overlayCtrl.hide();
+      await el.updateComplete;
       expect(spy.callCount).to.equal(2);
       expect(el.opened).to.be.false;
     });
