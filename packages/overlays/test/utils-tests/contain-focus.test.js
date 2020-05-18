@@ -111,4 +111,24 @@ describe('containFocus()', () => {
      */
     expect(getDeepActiveElement()).to.equal(focusableElements[2]);
   });
+
+  it('on window focusin, restores focus within root element', async () => {
+    await fixture(lightDomTemplate);
+    const root = document.getElementById('rootElement');
+    const focusableElements = getFocusableElements(root);
+
+    containFocus(root);
+
+    // Simulate tab in window
+    window.dispatchEvent(new Event('blur'));
+    document.getElementById('outside-1').focus();
+    window.dispatchEvent(new Event('focusin'));
+    expect(getDeepActiveElement()).to.equal(focusableElements[0]);
+
+    // Simulate shift+tab in window
+    window.dispatchEvent(new Event('blur'));
+    document.getElementById('outside-2').focus();
+    window.dispatchEvent(new Event('focusin'));
+    expect(getDeepActiveElement()).to.equal(focusableElements[focusableElements.length - 1]);
+  });
 });
