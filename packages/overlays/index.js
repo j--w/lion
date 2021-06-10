@@ -8,3 +8,4 @@ export { ArrowMixin } from './src/ArrowMixin.js';
 export { withBottomSheetConfig } from './src/configurations/withBottomSheetConfig.js';
 export { withModalDialogConfig } from './src/configurations/withModalDialogConfig.js';
 export { withDropdownConfig } from './src/configurations/withDropdownConfig.js';
+export { containFocus } from './src/utils/contain-focus.js';
